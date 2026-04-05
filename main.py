@@ -113,7 +113,9 @@ async def websocket_endpoint(websocket: WebSocket):
                 if player_room and player_id == 0:
                     game_type = msg.get("game_type", "memory")
                     if game_type == "memory":
-                        rooms[player_room]["game"] = create_memory_game(pairs=8)
+                        pairs = int(msg.get("pairs", 8))
+                        theme = msg.get("theme", "emojis")
+                        rooms[player_room]["game"] = create_memory_game(pairs=pairs, theme=theme)
                     elif game_type == "connect_four":
                         rooms[player_room]["game"] = create_connect_four()
                     elif game_type == "snakes_and_ladders":
@@ -261,7 +263,11 @@ async def websocket_endpoint(websocket: WebSocket):
                     elif game_type == "dots_and_boxes":
                         rooms[player_room]["game"] = create_dots_and_boxes()
                     else:
-                        rooms[player_room]["game"] = create_memory_game(pairs=8)
+                        old = rooms[player_room].get("game") or {}
+                        rooms[player_room]["game"] = create_memory_game(
+                            pairs=old.get("pairs", 8),
+                            theme=old.get("theme", "emojis"),
+                        )
                     await broadcast(player_room, {
                         "type": "game_started",
                         "game_type": game_type,
