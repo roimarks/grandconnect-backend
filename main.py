@@ -274,6 +274,16 @@ async def websocket_endpoint(websocket: WebSocket):
                     rooms[player_room]["game"] = None
                     await broadcast(player_room, {"type": "return_to_lobby"})
 
+            # ── Nav sync (host controls guest screen) ─────────────────────
+            elif action == "nav_sync":
+                if player_room and player_id == 0:
+                    await relay_to_other(player_room, websocket, {
+                        "type": "nav_sync",
+                        "screen": msg.get("screen"),
+                        "game_type": msg.get("game_type"),
+                        "story_id": msg.get("story_id"),
+                    })
+
             # ── Open story ────────────────────────────────────────────────
             elif action == "open_story":
                 if player_room:
